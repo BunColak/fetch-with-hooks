@@ -61,9 +61,9 @@ const useApi = <T extends ResponseTypes>(
     fetchApi();
   }, [path, filterParams, refetchToggle]);
 
-  const changeParams = (newParams: FilterParams) => {
+  const changeParams = useCallback((newParams: FilterParams) => {
     setFilterParams(newParams);
-  };
+  }, [])
 
   const refetch = useCallback(() => {
       setRefetchToggle(r => !r);

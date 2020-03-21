@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import useApi, { IPost } from "./utils/useApi";
 import Layout from "./Layout";
 import styled from "styled-components";
@@ -48,6 +48,10 @@ const Posts = () => {
     { _limit: currentCount }
   );
 
+  useEffect(() => {
+    changeParams({ _limit: currentCount });
+  }, [currentCount, changeParams])
+
   const generateExcerpt = (postBody: string) => {
     if (postBody.length > 100) {
       return `${postBody.substr(0, 100)}....`;
@@ -60,7 +64,6 @@ const Posts = () => {
       window.innerHeight + document.documentElement.scrollTop ===
       document.documentElement.offsetHeight
     ) {
-      changeParams({ _limit: currentCount + 10 });
       setCurrentCount(currentCount + 10);
     }
   }, 100);
