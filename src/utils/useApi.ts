@@ -6,6 +6,8 @@ const API_URL = "https://jsonplaceholder.typicode.com";
 interface FilterParams {
   userId?: string;
   postId?: string;
+  _page?: number;
+  _limit?: number;
 }
 
 export interface IPost {

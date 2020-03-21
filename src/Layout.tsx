@@ -2,7 +2,8 @@ import React from 'react'
 import styled from 'styled-components'
 
 const Container = styled.div`
-max-width: 1366px;
+max-width: 768px;
+padding: 0 1rem;
 margin: 0 auto;
 `
 interface IProps {

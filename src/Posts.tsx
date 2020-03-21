@@ -1,53 +1,88 @@
-import React from "react";
+import React, { useState } from "react";
 import useApi, { IPost } from "./utils/useApi";
 import Layout from "./Layout";
 import styled from "styled-components";
-import { useHistory } from "react-router-dom";
+import { Link } from "react-router-dom";
+import { debounce } from "debounce";
 
 const PostsContainer = styled.div`
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
   grid-gap: 2rem;
 `;
 
-const Post = styled.div`
-background: white;
-border-radius: 0.25rem;
-box-shadow: 0 0 1px 2px rgba(0,0,0,0.05);
-padding: 1rem;
-transition: 400ms;
+const Post = styled(Link)`
+  display: flex;
+  flex-direction: column;
+  background: white;
+  color: black;
+  text-decoration: none;
+  margin-top: 1rem;
 
-&:hover {
-  cursor: pointer;
-  box-shadow: 0 0 3px 6px rgba(0,0,0,0.1);
-}
-`
+  &:hover {
+    cursor: pointer;
+
+    .title {
+      border-bottom: 2px solid black;
+    }
+  }
+
+  .title {
+    font-size: 1.25rem;
+    font-weight: bold;
+    align-self: flex-start;
+    margin: 0;
+    margin-bottom: 0.5rem;
+    border-bottom: 2px solid transparent;
+    transition: 200ms;
+  }
+
+  .excerpt {
+    margin: 0.25rem 0;
+  }
+`;
 
 const Posts = () => {
-  const history = useHistory()
-  const { data: posts, error, loading, refetch } = useApi<IPost[]>("/posts");
+  const [currentCount, setCurrentCount] = useState(10);
+  const { data: posts, error, loading, changeParams } = useApi<IPost[]>(
+    "/posts",
+    { _limit: currentCount }
+  );
 
-  const onPostClick = (id: number) => {
-    history.push(`/posts/${id}`)
+  const generateExcerpt = (postBody: string) => {
+    if (postBody.length > 100) {
+      return `${postBody.substr(0, 100)}....`;
+    }
+    return `${postBody.substr(0, 95)}...`;
+  };
+
+  window.onscroll = debounce(() => {
+    if (
+      window.innerHeight + document.documentElement.scrollTop ===
+      document.documentElement.offsetHeight
+    ) {
+      changeParams({ _limit: currentCount + 10 });
+      setCurrentCount(currentCount + 10);
+    }
+  }, 100);
+
+  if (error) {
+    return <div>Error</div>;
   }
 
-  if(error) {
-    return <div>ERror</div>
-  }
-
-  if (loading) {
-    return <div>Loading</div>
+  if (loading && !posts) {
+    return <div>Loading</div>;
   }
 
   return (
     <Layout>
+      <h1>Latest posts: </h1>
       <PostsContainer>
         {posts?.map(post => (
-            <Post key={post.id} onClick={() => onPostClick(post.id)}>
-              <h4>{post.title}</h4>
-              <p>{post.body}</p>
-            </Post>
-          ))}
+          <Post to={`/posts/${post.id}`} key={post.id}>
+            <h4 className="title">{post.title}</h4>
+            <p className="excerpt">{generateExcerpt(post.body)}</p>
+          </Post>
+        ))}
       </PostsContainer>
     </Layout>
   );
